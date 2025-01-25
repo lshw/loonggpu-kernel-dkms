@@ -5,6 +5,7 @@
 #if defined(LG_DRM_TTM_TTM_DEVICE_H_PRESENT)
 #include <drm/ttm/ttm_device.h>
 #endif
+#include <linux/version.h>
 #include "conftest.h"
 
 unsigned long gsgpu_ttm_io_mem_pfn_buddy(struct ttm_buffer_object *bo,
@@ -159,7 +160,11 @@ static inline int lg_ttm_tt_bind(struct ttm_buffer_object *bo, lg_ttm_mem_t *mem
 	return ttm_tt_bind(bo->ttm, mem, ctx);
 #else
 	int r;
-	r = ttm_tt_populate(bo->bdev, bo->ttm, ctx);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0)
+        r = ttm_tt_populate(bo->bdev, bo->ttm, ctx);
+#else
+	r = ttm_bo_populate(bo, ctx);
+#endif
 	if (r)
 		return r;
 	r = gsgpu_ttm_backend_bind(bo->bdev, bo->ttm, mem);
