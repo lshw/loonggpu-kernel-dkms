@@ -10,12 +10,17 @@
 #if defined(LG_DRM_DRM_DAMAGE_HELPER_H_PRESENT)
 #include <drm/drm_damage_helper.h>
 #endif
+#include <linux/version.h>
 #include "gsgpu_drm.h"
 #include <linux/dma-buf.h>
 #include "gsgpu_helper.h"
 #include "gsgpu_display.h"
 #if defined (MODULE_IMPORT_NS)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0)
 MODULE_IMPORT_NS(DMA_BUF);
+#else
+MODULE_IMPORT_NS("DMA_BUF");
+#endif
 #endif
 
 static void gsgpu_display_flip_callback(struct dma_fence *f,
