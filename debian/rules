@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+# 1) 通用的目标，让dh处理标准流程(编译/安装/清理/构建等)
+%:
+	dh $@
+
+# 2) 如需要额外/自定义处理，可覆盖(override) dh 自动规则：
+# 这里覆盖 dh_auto_install，用于把源码文件拷贝到 /usr/src/loonggpu-1.0.1
+override_dh_auto_install:
+	mkdir -p debian/loonggpu-kernel-dkms/usr/src/loonggpu-1.0.1
+
+	# 拷贝所有源文件和 dkms.conf 等到该目录
+	echo cp -a loonggpu-1.0.1/* debian/loonggpu-kernel-dkms/usr/src/loonggpu-1.0.1
+	cp -a loonggpu-1.0.1/* debian/loonggpu-kernel-dkms/usr/src/loonggpu-1.0.1
+

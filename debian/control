@@ -1,0 +1,13 @@
+Source: loonggpu-kernel-dkms
+Section: kernel
+Priority: optional
+Maintainer: Loongson <service@loongnix.cn>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.0
+
+Package: loonggpu-kernel-dkms
+Architecture: loong64
+Depends: dkms, firmware-loongson-graphics, pciutils
+Section: unknown
+Priority: optional
+Description: LOONGGPU binary kernel module DKMS source

@@ -1,0 +1,111 @@
+#!/bin/sh
+set -e
+
+DKMS_NAME=loonggpu
+DKMS_VERSION=1.0.1
+initrd_dir="/boot"
+kernel_version="$(uname -r)"
+arch="$(uname -m)"
+
+
+# Run a command that we may or may not want to be detailed about.
+invoke_command()
+{
+    # $1 = command to be executed using eval.
+    # $2 = Description of command to run
+    local exitval=0
+    echo -e "$1" || echo -en "$2..."
+     eval "$1"; exitval=$?
+    [ $exitval -gt 0 ] && echo -en "(bad exit status: $exitval)"
+    echo "\n"
+    return $exitval
+}
+
+make_loonggpu_initrd() {
+    # $1 = kernel version
+    # $2 = arch
+    # $3 = 'backup', if backup of old initrd is wanted (using .old-dkms filename suffix)
+    [ $no_initrd ] && return
+    local mkinitrd 
+    local kernel_file 
+    local initrd_dir="/boot"
+    for mkinitrd in dracut update-initramfs mkinitrd mkinitramfs ''; do
+        [ $mkinitrd ] && which "$mkinitrd" >/dev/null 2>&1 && break
+    done
+
+    # No mkinitrd? Just return.
+    [ $mkinitrd ] || return 0
+
+    # Back up our current initrd
+    echo ""
+    # Find out what the proper filename will be
+    for initrd in "initrd-$1.img" "initramfs-$1.img" "initrd.img-$1" "initrd-$1" ''; do
+        [ $initrd ] && [ -f $initrd_dir/$initrd ] && break
+    done
+    if ! [ $initrd ]; then
+        # Return if we cannot find an initrd.
+        echo "Unable to find an initial ram disk that I know how to handle." \
+            "Will not try to make an initrd."
+        return 0
+    fi
+    if [ $3 = backup ]; then 
+        echo "Backing up $initrd to $initrd_dir/$initrd.old-dkms"
+        cp -f "$initrd_dir/$initrd" "$initrd_dir/$initrd.old-dkms"
+        echo "Making new $initrd"
+        echo "(If next boot fails, revert to $initrd.old-dkms image)"
+    fi
+
+    if [ $mkinitrd = dracut ]; then
+        invoke_command "$mkinitrd -f $initrd_dir/$initrd $1" "$mkinitrd"
+    elif [ $mkinitrd = update-initramfs ]; then
+        invoke_command "$mkinitrd -u -k $1" "$mkinitrd"
+    elif [ $mkinitrd = mkinitramfs ]; then
+        invoke_command "$mkinitrd -o $initrd_dir/$initrd $1" "$mkinitrd"
+    elif $mkinitrd --version >/dev/null 2>&1; then
+        invoke_command "$mkinitrd -f $initrd_dir/$initrd $1" "$mkinitrd"
+    elif [ -e /etc/SuSE-release ] || [ -d /etc/SuSEconfig ]; then
+        for kernel_file in vmlinuz vmlinux ''; do
+            [ $kernel_file ] && [ -f $initrd_dir/$kernel_file ] && break
+        done
+        if [ ! $kernel_file ]; then
+            echo "Unable to find valid kernel file under " \
+            "$initrd_dir for kernel version $1"
+            return 1;
+        fi
+        invoke_command "$mkinitrd -k $kernel_file-$1 -i $initrd" "$mkinitrd"
+    elif [ -e /etc/debian_version ]; then
+        invoke_command "$mkinitrd -o $initrd_dir/$initrd $1" "$mkinitrd"
+    else
+        echo ""
+        echo "Calling $mkinitrd (bad exit status 9 may occur)"
+        invoke_command "$mkinitrd" "$mkinitrd"
+    fi
+    return
+}
+
+case "$1" in
+    remove|upgrade|deconfigure)
+
+	if [ -f "/usr/lib/modprobe.d/loongson-blacklist.conf" ] ; then
+		rm "/usr/lib/modprobe.d/loongson-blacklist.conf" || true
+	fi
+
+	if [ -f "/usr/share/initramfs-tools/modules.d/loonggpu_mod" ] ; then
+		rm "/usr/share/initramfs-tools/modules.d/loonggpu_mod" || true
+   	fi
+
+      	if [ -f "/usr/lib/dracut/dracut.conf.d/10-loonggpu.conf" ] ; then
+		rm "/usr/lib/dracut/dracut.conf.d/10-loonggpu.conf" || true
+      	fi
+
+      	if [ -f "/etc/initramfs-tools/module" ] ; then
+         	sed -i "/^$DKMS_NAME$/d" /etc/initramfs-tools/modules || true
+      	fi
+
+      	if [  "$(dkms status -m $DKMS_NAME -v $DKMS_VERSION)" ]; then
+		dkms remove -m $DKMS_NAME -v $DKMS_VERSION --all
+      	fi
+
+	make_loonggpu_initrd "$kernel_version" "$arch" backup 
+    ;;
+esac

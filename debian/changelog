@@ -1,0 +1,36 @@
+loonggpu-kernel-dkms (1.0.1-alpha-lnd25.5-1) UNRELEASED; urgency=medium
+
+  * Non-maintainer upload.
+  * kernel6.13.0 update. 
+
+ -- liu shiwei <liushiwei@gmail.com>  Sat, 25 Jan 2025 22:01:23 +0800
+
+loonggpu-kernel-dkms (1.0.1-alpha-lnd25.5) unstable; urgency=medium
+
+  * release 1.0.1-alpha-lnd25.5
+
+ -- Loongson <service@loongnix.cn>  Mon, 13 Jan 2025 03:17:24 +0000
+
+loonggpu-kernel-dkms (1.0.1-alpha-lnd25.4) unstable; urgency=medium
+
+  * release 1.0.1-alpha-lnd25.4
+
+ -- Loongson <service@loongnix.cn>  Thu, 02 Jan 2025 06:02:25 +0000
+
+loonggpu-kernel-dkms (1.0.1-alpha-lnd25.3) unstable; urgency=medium
+
+  * release 1.0.1-alpha-lnd25.3
+
+ -- Loongson <service@loongnix.cn>  Mon, 30 Dec 2024 02:54:23 +0000
+
+loonggpu-kernel-dkms (1.0.1-alpha-lnd25.2) unstable; urgency=medium
+
+  * release 1.0.1-alpha-lnd25.2
+
+ -- Loongson <service@loongnix.cn>  Fri, 13 Dec 2024 07:36:14 +0000
+
+loonggpu-kernel-dkms (1.0.1-alpha-lnd25.1) unstable; urgency=medium
+
+  * release 1.0.1-alpha-lnd25.1
+
+ -- Loongson <service@loongnix.cn>  Mon, 09 Dec 2024 07:42:34 +0000
